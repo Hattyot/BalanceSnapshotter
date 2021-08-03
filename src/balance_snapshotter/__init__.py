@@ -226,14 +226,21 @@ class Balances:
         self.balances = {}
 
     def set(self, token, account, value):
-        """Set the token balance value for an account."""
+        """
+        Set the token balance value for an account.
+
+        Parameters
+        -----------
+        token: :class:`Token`
+            The token.
+        account: :class:`brownie.network.account.Account`
+            The account.
+        value: :class:`float`
+            The amount of tokens.
+        """
         if token not in self.balances:
             self.balances[token] = {}
         self.balances[token][account] = value
-
-    def get(self, token, account):
-        """Get the token balance value for an account."""
-        return self.balances[token][account]
 
     def print(self):
         """Prints out the all the token balances of all the accounts."""
@@ -254,4 +261,4 @@ class Balances:
                     ]
                 )
 
-        print(tabulate(table, headers=["account", "balance", "asset"]))
+        print(tabulate(table, headers=["asset", "account", "balance"]))
