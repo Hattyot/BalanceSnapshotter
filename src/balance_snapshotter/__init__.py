@@ -214,7 +214,14 @@ class BalanceSnapshotter:
 
 
 class Balances:
-    """Class used to store balances for snapshots."""
+    """
+    Class used to store balances for snapshots.
+
+    Attributes
+    -----------
+    balances: Dict[:class:`Token`, Dict[:class:`brownie.network.account.Account`, :class:`float`]]
+        Dictionary that contains the token balances of all the accounts.
+    """
     def __init__(self):
         self.balances = {}
 
