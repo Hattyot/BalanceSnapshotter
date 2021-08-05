@@ -18,12 +18,12 @@ class TokenData:
 
         Parameters
         ----------
-        token: Union[:class:`brownie.network.contract.Contract`, :class:`str`])
+        token: Union[brownie.network.contract.Contract, str])
             The token as a contract object or token address.
 
         Returns
         -------
-        :class:`int`
+        int
             Token decimals.
         """
         return self.fetch_token_data(token)['decimals']
@@ -34,12 +34,12 @@ class TokenData:
 
         Parameters
         ----------
-        token: Union[:class:`brownie.network.contract.Contract`, :class:`str`])
+        token: Union[brownie.network.contract.Contract, str])
             The token as a contract object or token address.
 
         Returns
         -------
-        :class:`str`
+        str
             Token symbol.
         """
         return self.fetch_token_data(token)['symbol']
@@ -50,12 +50,12 @@ class TokenData:
 
         Parameters
         ----------
-        token: Union[:class:`brownie.network.contract.Contract`, :class:`str`])
+        token: Union[brownie.network.contract.Contract, str])
             The token as a contract object or token address.
 
         Returns
         -------
-        :class:`str`
+        str
             Token name.
         """
         return self.fetch_token_data(token)['name']
@@ -66,12 +66,12 @@ class TokenData:
 
         Parameters
         ----------
-        token: Union[:class:`brownie.network.contract.Contract`, :class:`str`])
+        token: Union[brownie.network.contract.Contract, str])
             The token as a contract object or token address.
 
         Returns
         -------
-        Dict[:class:`str`, Union[:class:`str`, :class:`int`]]
+        Dict[str, Union[str, int]]
             All the token data in dict form {"name": name, "symbol": symbol, "decimals": decimals}
         """
         # first check if token data is already cached, if not, cache it

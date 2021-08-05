@@ -21,14 +21,14 @@ def val(amount: int = 0, decimals: int = 18) -> str:
 
     Parameters
     ----------
-    amount: :class:`int`
+    amount: int
         The amount of tokens.
-    decimals: :class:`int`
+    decimals: int
         The decimals of the token.
 
     Returns
     -------
-    :class:`str`
+    str
         amount of tokens divided by 10 to the power of `decimals`.
     """
     return "{:,.18f}".format(amount / 10 ** decimals)
@@ -40,24 +40,24 @@ class BalanceSnapshotter:
 
     Parameters
     ----------
-    _tokens: List[Union[:class:`brownie.network.contract.Contract`, :class:`str`]]
+    _tokens: List[Union[brownie.network.contract.Contract, str]]
         List of tokens in either string from or badger token form.
-    _accounts: List[Union[:class:`brownie.network.account.Account`, :class:`str`]]
+    _accounts: List[Union[brownie.network.account.Account, str]]
         List of tokens in either string form or badger account form.
-    loop: Optional[:class:`asyncio.BaseEventLoop`]
+    loop: Optional[asyncio.BaseEventLoop]
         Asyncio loop that will be used in the creation of the snapshot.
 
     Attributes
     -----------
-    tokens: List[:class:`brownie.network.contract.Contract`]
+    tokens: List[brownie.network.contract.Contract]
         List of tokens.
-    accounts: List[:class:`brownie.network.account.Account`]
+    accounts: List[brownie.network.account.Account]
         List of accounts.
-    snaps: List[:class:`dict`]
-        List of snapshots which are in dict form {"name": :class:`str`, balances: :class:`Balances`}
-    loop: :class:`asyncio.BaseEventLoop`
+    snaps: List[dict]
+        List of snapshots which are in dict form {"name": str, balances: Balances}
+    loop: asyncio.BaseEventLoop
         Asyncio loop used to run snapshot coroutine.
-    balance_event: :class:`asyncio.Event`
+    balance_event: asyncio.Event
         Event used to manage the flow of the snap method.
     """
 
@@ -83,11 +83,11 @@ class BalanceSnapshotter:
         """
         Add a token to the list of tokens.
 
-        If a token is provided as a string, it will be converted to :class:`brownie.network.contract.Contract`.
+        If a token is provided as a string, it will be converted to brownie.network.contract.Contract.
 
         Parameters
         -----------
-        token: Union[:class:`brownie.network.contract.Contract`, :class:`str`]
+        token: Union[brownie.network.contract.Contract, str]
             The token that will be added
         """
         # if provided token is in string format, change it to Token object
@@ -103,7 +103,7 @@ class BalanceSnapshotter:
 
         Parameters
         -----------
-        account: Union[:class:`brownie.network.account.Account`, :class:`str`]
+        account: Union[brownie.network.account.Account, str]
             The account that will be added.
         """
         # Convert raw addresses into account objects
@@ -119,14 +119,14 @@ class BalanceSnapshotter:
 
         Parameters
         -----------
-        name: :class:`str`
+        name: str
             The name that will be assigned to the snap.
-        print_snap: :class:`bool`
+        print_snap: bool
             If True, snap will be printed out.
 
         Returns
         -------
-        Dict[:class:`str`, Union[:class:`str`, :class:`Balances`]]
+        Dict[str, Union[str, Balances]]
             The snap that was taken. {"name": name, "balances": Balances}
         """
         # create a task if the loop is already running, otherwise run the loop until the async function completes.
@@ -162,7 +162,7 @@ class BalanceSnapshotter:
 
         Parameters
         -----------
-        name: :class:`str`
+        name: str
             The name that will be assigned to the snap
         """
         balances = Balances()
@@ -190,12 +190,12 @@ class BalanceSnapshotter:
 
         Parameters
         ----------
-        print_diff: :class:`bool`
+        print_diff: bool
             If True prints out difference table, otherwise just returns it
 
         Returns
         -------
-        :class:`str`
+        str
             Generated difference table.
         """
         if len(self.snaps) < 2:
@@ -241,7 +241,7 @@ class Balances:
 
     Attributes
     -----------
-    balances: Dict[:class:`brownie.network.contract.Contract`, Dict[:class:`brownie.network.account.Account`, :class:`float`]]
+    balances: Dict[brownie.network.contract.Contract, Dict[brownie.network.account.Account, float]]
         Dictionary that contains the token balances of all the accounts.
     """
 
@@ -254,11 +254,11 @@ class Balances:
 
         Parameters
         -----------
-        token: :class:`brownie.network.contract.Contract`
+        token: brownie.network.contract.Contract
             The token.
-        account: :class:`brownie.network.account.Account`
+        account: brownie.network.account.Account
             The account.
-        value: :class:`int`
+        value: int
             The amount of tokens.
         """
         if token not in self.balances:
@@ -271,14 +271,14 @@ class Balances:
 
         Parameters
         -----------
-        token: :class:`brownie.network.contract.Contract`
+        token: brownie.network.contract.Contract
             The token.
-        account: :class:`brownie.network.account.Account`
+        account: brownie.network.account.Account
             The account.
 
         Returns
         -------
-        :class:`int`
+        int
             the token balance for an account.
         """
         return self.balances[token][account]
