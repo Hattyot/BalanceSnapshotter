@@ -90,7 +90,7 @@ class TokenData:
         return self.data[token.address]
 
 
-def get_token_data():
+def get_token_data() -> TokenData:
     """
     Get an active TokenData instance.
 
