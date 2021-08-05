@@ -3,6 +3,8 @@ import asyncio
 from tabulate import tabulate
 from typing import Union
 from rich.console import Console
+from brownie.network.contract import Contract
+from brownie.network.account import Account
 from brownie import (
     interface,
     accounts as b_accounts
@@ -25,7 +27,7 @@ def val(amount: int = 0, decimals: int = 18) -> str:
     Returns
     -------
     :class:`str`
-        amount of tokens divided by 10 to the power of `decimals`
+        amount of tokens divided by 10 to the power of `decimals`.
     """
     return "{:,.18f}".format(amount / 10 ** decimals)
 
@@ -37,7 +39,7 @@ class Token:
     Parameters
     ----------
     token: :class:`brownie.network.contract.Contract`
-        Token in brownie form.
+        The actual token in brownie Contract form.
 
     Attributes
     -----------
@@ -53,15 +55,15 @@ class Token:
         Decimals of the token.
     """
 
-    def __init__(self, token):
-        self._token = token
+    def __init__(self, token: Contract):
+        self._token: Contract = token
 
-        self.address = self._token.address
-        self.name = self._token.name()
-        self.symbol = self._token.symbol()
-        self.decimals = self._token.decimals()
+        self.address: str = self._token.address
+        self.name: str = self._token.name()
+        self.symbol: str = self._token.symbol()
+        self.decimals: int = self._token.decimals()
 
-    def balanceOf(self, *args, **kwargs) -> float:
+    def balanceOf(self, *args, **kwargs) -> int:
         """Redirect the balanceOf function call to the actual token."""
         return self._token.balanceOf(*args, **kwargs)
 
@@ -112,7 +114,7 @@ class BalanceSnapshotter:
         Event used to manage the flow of the snap method.
     """
 
-    def __init__(self, _tokens: list, _accounts: list, *, loop: asyncio.BaseEventLoop = None):
+    def __init__(self, _tokens: list[Contract], _accounts: list[Account], *, loop: asyncio.BaseEventLoop = None):
         # convert any raw addresses to proper token objects
         for i, token in enumerate(_tokens):
             if type(token) == str:
@@ -124,13 +126,13 @@ class BalanceSnapshotter:
                 _accounts[i] = b_accounts.at(account, force=True)
 
         self.tokens: list[Token] = [Token(token) for token in _tokens]
-        self.accounts: list = _accounts
+        self.accounts: list[Account] = _accounts
         self.snaps: list[dict] = []
 
         self.loop: asyncio.BaseEventLoop = loop if loop else asyncio.get_event_loop()
         self.balance_event: asyncio.Event = asyncio.Event()
 
-    def add_token(self, token):
+    def add_token(self, token: Union[Contract, str]):
         """
         Add a token to the list of tokens.
 
@@ -147,7 +149,7 @@ class BalanceSnapshotter:
             token = Token(token)
         self.tokens.append(token)
 
-    def add_account(self, account):
+    def add_account(self, account: Union[Account, str]):
         """
         Add an account to the list of accounts.
 
@@ -298,9 +300,9 @@ class Balances:
     """
 
     def __init__(self):
-        self.balances = {}
+        self.balances: dict[Token, dict[Account, int]] = {}
 
-    def set(self, token, account, value):
+    def set(self, token: Token, account: Account, value: int):
         """
         Set the token balance value for an account.
 
@@ -310,7 +312,7 @@ class Balances:
             The token.
         account: :class:`brownie.network.account.Account`
             The account.
-        value: :class:`float`
+        value: :class:`int`
             The amount of tokens.
         """
         if token not in self.balances:
