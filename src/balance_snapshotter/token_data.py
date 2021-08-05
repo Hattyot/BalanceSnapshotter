@@ -7,7 +7,14 @@ token_data = None
 
 
 class TokenData:
-    """Class that manages all the token data."""
+    """
+    Class that manages all the token data.
+
+    Attributes
+    ----------
+    data: Dict[str, Dict[str, Union[str, int]]]
+        Dict that contains all the needed data for tokens.
+    """
 
     def __init__(self):
         self.data: dict[str, dict[str, Union[str, int]]] = {}
@@ -24,7 +31,7 @@ class TokenData:
         Returns
         -------
         int
-            Token decimals.
+            The token decimals.
         """
         return self.fetch_token_data(token)['decimals']
 
@@ -40,7 +47,7 @@ class TokenData:
         Returns
         -------
         str
-            Token symbol.
+            The token symbol.
         """
         return self.fetch_token_data(token)['symbol']
 
@@ -56,7 +63,7 @@ class TokenData:
         Returns
         -------
         str
-            Token name.
+            The token name.
         """
         return self.fetch_token_data(token)['name']
 
