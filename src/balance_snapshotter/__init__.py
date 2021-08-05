@@ -3,6 +3,7 @@ import asyncio
 from tabulate import tabulate
 from typing import Union
 from rich.console import Console
+from .token_data import get_token_data
 from brownie.network.contract import Contract
 from brownie.network.account import Account
 from brownie import (
@@ -11,6 +12,7 @@ from brownie import (
 )
 
 console = Console()
+token_data = get_token_data()
 
 
 def val(amount: int = 0, decimals: int = 18) -> str:
@@ -32,61 +34,6 @@ def val(amount: int = 0, decimals: int = 18) -> str:
     return "{:,.18f}".format(amount / 10 ** decimals)
 
 
-class Token:
-    """
-    Class used for making certain values of a token more easily accessible.
-
-    Parameters
-    ----------
-    token: :class:`brownie.network.contract.Contract`
-        The actual token in brownie Contract form.
-
-    Attributes
-    -----------
-    _token: :class:`brownie.network.contract.Contract`
-        The actual token.
-    address: :class:`str`
-        Address of the token.
-    name: :class:`str`
-        Name of the token.
-    symbol: :class:`str`
-        Symbol of the token.
-    decimals: :class:`int`
-        Decimals of the token.
-    """
-
-    def __init__(self, token: Contract):
-        self._token: Contract = token
-
-        self.address: str = self._token.address
-        self.name: str = self._token.name()
-        self.symbol: str = self._token.symbol()
-        self.decimals: int = self._token.decimals()
-
-    def balanceOf(self, *args, **kwargs) -> int:
-        """Redirect the balanceOf function call to the actual token."""
-        return self._token.balanceOf(*args, **kwargs)
-
-    def __hash__(self) -> int:
-        """Magic method for hashing the token class."""
-        return hash(self.address)
-
-    def __eq__(self, other) -> bool:
-        """
-        Check if token is equal to other token.
-
-        In the case of a string it checks against token address.
-        In the case of a Token type, it checks against self.
-        Otherwise it checks against _token.
-        """
-        if type(other) == str:
-            return self.address == str
-        elif type(other) == Token:
-            return other == self
-        else:
-            return other == self._token
-
-
 class BalanceSnapshotter:
     """
     Main class of the module used to take, compare and manage snapshots.
@@ -102,8 +49,8 @@ class BalanceSnapshotter:
 
     Attributes
     -----------
-    tokens: List[:class:`Token`]
-        List of tokens converted to :class:`Token`.
+    tokens: List[:class:`brownie.network.contract.Contract`]
+        List of tokens.
     accounts: List[:class:`brownie.network.account.Account`]
         List of accounts.
     snaps: List[:class:`dict`]
@@ -125,7 +72,7 @@ class BalanceSnapshotter:
             if type(account) == str:
                 _accounts[i] = b_accounts.at(account, force=True)
 
-        self.tokens: list[Token] = [Token(token) for token in _tokens]
+        self.tokens: list[Contract] = _tokens
         self.accounts: list[Account] = _accounts
         self.snaps: list[dict] = []
 
@@ -136,7 +83,7 @@ class BalanceSnapshotter:
         """
         Add a token to the list of tokens.
 
-        If a token is provided as a string, it will be converted to :class:`Token`.
+        If a token is provided as a string, it will be converted to :class:`brownie.network.contract.Contract`.
 
         Parameters
         -----------
@@ -146,7 +93,6 @@ class BalanceSnapshotter:
         # if provided token is in string format, change it to Token object
         if type(token) == str:
             token = interface.IERC20(token)
-            token = Token(token)
         self.tokens.append(token)
 
     def add_account(self, account: Union[Account, str]):
@@ -272,7 +218,7 @@ class BalanceSnapshotter:
                 amount = (
                     val(
                         after[token][account] - value,
-                        decimals=token.decimals,
+                        decimals=token_data.get_decimals(token),
                     ),
                 )
 
@@ -280,7 +226,7 @@ class BalanceSnapshotter:
                 if amount == 0:
                     continue
 
-                table.append([token.symbol, account, amount])
+                table.append([token_data.get_symbol(token), account, amount])
 
         table = tabulate(table, headers=["asset", "account", "balance"])
         if print_diff:
@@ -295,20 +241,20 @@ class Balances:
 
     Attributes
     -----------
-    balances: Dict[:class:`Token`, Dict[:class:`brownie.network.account.Account`, :class:`float`]]
+    balances: Dict[:class:`brownie.network.contract.Contract`, Dict[:class:`brownie.network.account.Account`, :class:`float`]]
         Dictionary that contains the token balances of all the accounts.
     """
 
     def __init__(self):
-        self.balances: dict[Token, dict[Account, int]] = {}
+        self.balances: dict[Contract, dict[Account, int]] = {}
 
-    def set(self, token: Token, account: Account, value: int):
+    def set(self, token: Contract, account: Account, value: int):
         """
         Set the token balance value for an account.
 
         Parameters
         -----------
-        token: :class:`Token`
+        token: :class:`brownie.network.contract.Contract`
             The token.
         account: :class:`brownie.network.account.Account`
             The account.
@@ -319,12 +265,30 @@ class Balances:
             self.balances[token] = {}
         self.balances[token][account] = value
 
+    def get(self, token: Contract, account: Account) -> int:
+        """
+        Get the token balance value for an account.
+
+        Parameters
+        -----------
+        token: :class:`brownie.network.contract.Contract`
+            The token.
+        account: :class:`brownie.network.account.Account`
+            The account.
+
+        Returns
+        -------
+        :class:`int`
+            the token balance for an account.
+        """
+        return self.balances[token][account]
+
     def print(self):
         """Print out all the token balances of all the accounts."""
         table = []
         for token, accounts in self.balances.items():
             for account, value in accounts.items():
-                amount = val(value, decimals=token.decimals)
+                amount = val(value, decimals=token_data.get_decimals(token))
 
                 # ignore 0 balance
                 if amount == 0:
@@ -332,9 +296,9 @@ class Balances:
 
                 table.append(
                     [
+                        token_data.get_symbol(token),
                         account.address,
-                        val(value, decimals=token.decimals),
-                        token.symbol,
+                        val(value, decimals=token_data.get_decimals(token))
                     ]
                 )
 
