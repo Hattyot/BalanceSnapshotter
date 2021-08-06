@@ -1,5 +1,5 @@
 # BalanceSnapshotter
-Module for eth-brownie used to take snapshots of token balances of accounts
+A helper module for the badger system and eth-brownie used to take snapshots of token balances of accounts
 
 
 ## Requierments
