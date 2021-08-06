@@ -61,7 +61,7 @@ class BalanceSnapshotter:
         Event used to manage the flow of the snap method.
     """
 
-    def __init__(self, _tokens: list[Contract], _accounts: list[Account], *, loop: asyncio.BaseEventLoop = None):
+    def __init__(self, _tokens: list[Union[Contract, str]], _accounts: list[Union[Account, str]], *, loop: asyncio.BaseEventLoop = None):
         # convert any raw addresses to proper token objects
         for i, token in enumerate(_tokens):
             if type(token) == str:
