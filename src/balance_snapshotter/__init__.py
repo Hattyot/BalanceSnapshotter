@@ -11,13 +11,15 @@ from brownie import (
     accounts as b_accounts
 )
 
+__version__ = "0.3.0"
+
 console = Console()
 token_data = get_token_data()
 
 
-def val(amount: int = 0, decimals: int = 18) -> str:
+def decimal_converter(amount: int = 0, decimals: int = 18) -> str:
     """
-    Convert token amount to appropriate string value.
+    Moves the decimal point for token amount.
 
     Parameters
     ----------
@@ -29,7 +31,7 @@ def val(amount: int = 0, decimals: int = 18) -> str:
     Returns
     -------
     str
-        amount of tokens divided by 10 to the power of `decimals`.
+        Amount of tokens divided by 10 to the power of `decimals`.
     """
     return "{:,.18f}".format(amount / 10 ** decimals)
 
@@ -196,7 +198,12 @@ class BalanceSnapshotter:
         Returns
         -------
         str
-            Generated difference table.
+            Generated difference table where balance is last snap balance minus second to last snap balance.
+
+            Example:
+            asset    account                                     balance
+            -------  ------------------------------------------  -------------------------
+            WBTC     0x5b5cF8620292249669e1DCC73B753d01543D6Ac7  2.361588530000000130
         """
         if len(self.snaps) < 2:
             raise Exception("Insufficient snaps have been taken to compare last two")
@@ -215,11 +222,9 @@ class BalanceSnapshotter:
         table = []
         for token, accounts in before.items():
             for account, value in accounts.items():
-                amount = (
-                    val(
-                        after[token][account] - value,
-                        decimals=token_data.get_decimals(token),
-                    ),
+                amount = decimal_converter(
+                    after[token][account] - value,
+                    decimals=token_data.get_decimals(token),
                 )
 
                 # ignore 0 balance
@@ -284,11 +289,18 @@ class Balances:
         return self.balances[token][account]
 
     def print(self):
-        """Print out all the token balances of all the accounts."""
+        """
+        Print out all the token balances of all the accounts.
+
+        Output Example:
+            asset    account                                       balance
+            -------  ------------------------------------------  ---------
+            WBTC     0x5b5cF8620292249669e1DCC73B753d01543D6Ac7    4.72318
+        """
         table = []
         for token, accounts in self.balances.items():
             for account, value in accounts.items():
-                amount = val(value, decimals=token_data.get_decimals(token))
+                amount = decimal_converter(value, decimals=token_data.get_decimals(token))
 
                 # ignore 0 balance
                 if amount == 0:
@@ -298,7 +310,7 @@ class Balances:
                     [
                         token_data.get_symbol(token),
                         account.address,
-                        val(value, decimals=token_data.get_decimals(token))
+                        decimal_converter(value, decimals=token_data.get_decimals(token))
                     ]
                 )
 

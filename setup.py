@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="balance_snapshotter",
-    version="0.3",
+    version="0.3.0",
     author="Hattyot",
     description="Module for eth-brownie used to take snapshots of token balances of accounts",
     url="https://github.com/Hattyot/BalanceSnapshotter",

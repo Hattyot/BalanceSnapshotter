@@ -13,7 +13,7 @@ python >= 3.9
 ```shell
 pip3 install balance_snapshotter
 ```
-### By cloning
+### From source
 ```shell
 git clone https://github.com/Hattyot/BalanceSnapshotter.git
 pip3 install -e BalanceSnapshotter
@@ -25,21 +25,30 @@ pip3 install -e BalanceSnapshotter
 from balance_snapshotter import BalanceSnapshotter
 from brownie import interface, accounts
 
-account = accounts.at('0x5b5cF8620292249669e1DCC73B753d01543D6Ac7', force=True)
-wbtc = interface.IERC20("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")
-wbtc.transfer(account, wbtc.balanceOf(wbtc) // 2, {"from": wbtc})
+# constants
+wbtc_address = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+account_address = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
 
+# Create account and token objects
+account = accounts.at(account_address, force=True)
+wbtc = interface.IERC20(account_address)
+
+# Initialize BalanceSnapshotter() object with token contract(s) and account(s)
 snap = BalanceSnapshotter([wbtc], [account])
-# tokens and accounts can also be given via addresses
-# snap = BalanceSnapshotter(["0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"], ["0x5b5cF8620292249669e1DCC73B753d01543D6Ac7"])
+# Tokens and accounts can also be provided directly via addresses instead of as contract and account objects
+# snap = BalanceSnapshotter([wbtc_address], [account_address])
 
-snap.snap()
-
+# Create a transaction
 wbtc.transfer(account, wbtc.balanceOf(wbtc) // 2, {"from": wbtc})
 
-snap.snap()
-snap.diff_last_two()
-```
-```
+# Take a snapshot and print it out in a table form
+snap.snap(print_snap=True)
 
+# Create another transaction
+wbtc.transfer(account, wbtc.balanceOf(wbtc) // 2, {"from": wbtc})
+
+# Take another snapshot
+snap.snap()
+# print out the difference of the last 2 snapshots
+snap.diff_last_two()
 ```
